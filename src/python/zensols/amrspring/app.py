@@ -55,7 +55,9 @@ class Application(object):
     client: AmrParseClient = field()
 
     def parse(self, text: str):
-        """Does something interesting.
+        """Parse ``text`` and generate AMRs.
+
+        :param text: the sentence to parse
 
         """
         graph_str: str
