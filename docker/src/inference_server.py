@@ -64,7 +64,9 @@ def parse_args():
 
 
 class Batcher(object):
-    """An iterable that creates sentence batches."""
+    """An iterable that creates sentence batches.
+
+    """
     def __init__(self, stash: Stash, sents: Tuple[str],
                  batch_size: int = 500, max_length: int = 200):
         data: Tuple[int, str, int] = []
@@ -168,7 +170,14 @@ class AmrParseService(object):
         return model, tokenizer, device
 
     def parse(self, sents: Tuple[str]) -> Dict[int, Dict[str, Any]]:
-        """
+        """Parse sentences into AMR graphs.
+
+        :param sents: the natural language sentences used for model prediction
+                      into graphs
+
+        :return: a dict of sentence index (for ordering) as keys and values with
+                 graphs or errors with model status as values.
+
         """
         if logger.isEnabledFor(logging.INFO):
             logger.info(f'parsing: {tw.shorten(str(sents), 60)}')
@@ -226,6 +235,10 @@ service = AmrParseService()
 
 @app.route('/parse', methods=['POST'])
 def parse_amr() -> Dict[int, Dict[str, Any]]:
+    """Service endpoint that takes a JSON request (natural language sentences)
+    and returns a JSON response (graphs or errors).
+
+    """
     req: Dict[str, Any] = request.json
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f'request: {req}')
