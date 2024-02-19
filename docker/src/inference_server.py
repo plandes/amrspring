@@ -1,13 +1,21 @@
+"""A flask server that uses the SPRING model to parse natural lanuage into AMR
+graphs.  This service also optionally caches the results.
+
+"""
+__author__ = 'Paul Landes'
+
 from typing import Tuple, Iterable
 from dataclasses import dataclass, field
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from typing import Dict, Any
 import logging
+from pathlib import Path
 import textwrap as tw
 from flask import Flask, request
 import json
 import torch
-from zensols.persist import persisted
+from penman.graph import Graph
+from zensols.persist import persisted, Stash
 from spring_amr.penman import encode
 from spring_amr.utils import instantiate_model_and_tokenizer
 
@@ -15,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args():
+    """Parse command line arguments."""
     parser = ArgumentParser(
         description="A service to predict AMRs from text sentences.",
         formatter_class=ArgumentDefaultsHelpFormatter,
@@ -22,6 +31,9 @@ def parse_args():
     parser.add_argument(
         '--port', type=int, default=8080,
         help="Endpoint bound port.")
+    parser.add_argument(
+        '--datadir', type=str, default=None,
+        help="The directory to store cache files is provided.")
     parser.add_argument(
         '--checkpoint', type=str, required=True,
         help="Required. Checkpoint to restore.")
@@ -34,6 +46,9 @@ def parse_args():
     parser.add_argument(
         '--batch-size', type=int, default=1000,
         help="Batch size (as number of linearized graph tokens per batch).")
+    parser.add_argument(
+        '--max-tokens', type=int, default=200,
+        help="Max number of tokens allowed before creating error.")
     parser.add_argument(
         '--penman-linearization', action='store_true',
         help="Predict using PENMAN linearization instead of ours.")
@@ -49,18 +64,32 @@ def parse_args():
 
 
 class Batcher(object):
-    def __init__(self, sents: Tuple[str], batch_size: int = 500,
-                 max_length: int = 100):
+    """An iterable that creates sentence batches."""
+    def __init__(self, stash: Stash, sents: Tuple[str],
+                 batch_size: int = 500, max_length: int = 200):
         data: Tuple[int, str, int] = []
         sents: Iterable[str] = filter(
             lambda s: len(s) > 0, map(str.strip, sents))
+        errors: Dict[str, str] = {}
+        cached: Dict[str, str] = {}
         for idx, sent in enumerate(sents):
-            n: int = len(sent.split())
-            if n > max_length:
-                raise ValueError(f'Sentence too long: {sent}')
-            data.append((idx, sent, n))
+            if sent in stash:
+                cached[idx] = {
+                    'graph': stash[sent],
+                    'status': 'cached'}
+            else:
+                n: int = len(sent.split())
+                if n > max_length:
+                    snt: str = tw.shorten(sent, 80)
+                    errors[idx] = {
+                        'status': 'error',
+                        'error': f'Sentence too long ({n}) tokens): {snt}'}
+                else:
+                    data.append((idx, sent, n))
         self._data = data
         self._batch_size = batch_size
+        self.errors = errors
+        self.cached = cached
 
     def __iter__(self) -> Iterable[Tuple[int, str, int]]:
         batch_size = self._batch_size
@@ -91,10 +120,37 @@ class Batcher(object):
 
 @dataclass
 class AmrParseService(object):
+    """The service that uses the model to parse sentences into AMR graphs."""
+
     args: Any = field(default=None)
+    """The parsed command line arguments.  See :func:`parse_args`."""
+
+    @property
+    @persisted('_stash')
+    def stash(self) -> Stash:
+        """A stash that caches sentences (keys) and their respective AMR
+        prediction results (values).
+
+        """
+        if self.args.datadir is None:
+            from zensols.db import DictionaryStash
+            return DictionaryStash()
+        else:
+            from zensols.db.sqlite import SqliteDbStash
+            from zensols.db.stash import DbStashEncoderDecoder
+            db_file: Path = Path(self.args.datadir) / 'graphs.sqlite3'
+            logger.info(f'caching graphs at {db_file}')
+            return SqliteDbStash(
+                encoder_decoder=DbStashEncoderDecoder(),
+                path=db_file)
 
     @persisted('_model', cache_global=True)
     def _get_model_tokenizer(self):
+        """Create the model and tokenizer.
+
+        :return: a tuple of the SPRING mode, tokenizer and CUDA device
+
+        """
         args = self.args
         model, tokenizer = instantiate_model_and_tokenizer(
             args.model,
@@ -111,12 +167,20 @@ class AmrParseService(object):
         model.eval()
         return model, tokenizer, device
 
-    def parse(self, sents: Tuple[str]) -> Iterable[str]:
+    def parse(self, sents: Tuple[str]) -> Dict[int, Dict[str, Any]]:
+        """
+        """
         if logger.isEnabledFor(logging.INFO):
             logger.info(f'parsing: {tw.shorten(str(sents), 60)}')
         args = self.args
         model, tokenizer, device = self._get_model_tokenizer()
-        iterator = Batcher(sents, args.batch_size)
+        iterator = Batcher(
+            self.stash, sents,
+            batch_size=args.batch_size,
+            max_length=args.max_tokens)
+        graphs: Dict[str, Dict[Any]] = {}
+        graphs.update(iterator.cached)
+        graphs.update(iterator.errors)
         for batch in iterator:
             ids, sentences, _ = zip(*batch)
             if logger.isEnabledFor(logging.DEBUG):
@@ -124,26 +188,33 @@ class AmrParseService(object):
             x, _ = tokenizer.batch_encode_sentences(sentences, device=device)
             with torch.no_grad():
                 model.amr_mode = True
-                out = model.generate(
-                    **x, max_length=512,
-                    decoder_start_token_id=0,
-                    num_beams=args.beam_size)
-            bgraphs = []
+                try:
+                    out = model.generate(
+                        **x, max_length=512,
+                        decoder_start_token_id=0,
+                        num_beams=args.beam_size)
+                except Exception as e:
+                    for idx, sent in zip(ids, sentences):
+                        graphs[idx] = {
+                            'status': 'error',
+                            'error': str(e)}
+                    continue
             for idx, sent, tokk in zip(ids, sentences, out):
+                graph: Graph
                 graph, status, (lin, backr) = tokenizer.decode_amr(
                     tokk.tolist(), restore_name_ops=args.restore_name_ops)
-                if args.only_ok and ('OK' not in str(status)):
-                    continue
-                graph.metadata['status'] = str(status)
-                graph.metadata['nsent'] = str(idx)
-                graph.metadata['snt'] = sent
-                bgraphs.append((idx, graph))
-
-            for i, g in bgraphs:
-                gr_str: str = encode(g)
-                if logger.isEnabledFor(logging.DEBUG):
-                    logger.debug(f'prediction: <{gr_str}>')
-                yield gr_str
+                status_str: str = str(status)
+                is_err: bool = 'OK' not in status_str
+                gr_str: str = None
+                if not is_err:
+                    graph.metadata['snt'] = sent
+                    gr_str = encode(graph)
+                    self.stash.dump(sent, gr_str)
+                graphs[idx] = {
+                    'model_status': status_str,
+                    'status': 'success',
+                    'graph': gr_str}
+        return graphs
 
 
 # Flask server instance
@@ -154,13 +225,13 @@ service = AmrParseService()
 
 
 @app.route('/parse', methods=['POST'])
-def parse_amr() -> str:
+def parse_amr() -> Dict[int, Dict[str, Any]]:
     req: Dict[str, Any] = request.json
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(f'request: {req}')
     if 'sents' not in req:
         return {'error': "Expecting key 'sents' in request"}
-    amrs: Tuple[str] = tuple(service.parse(req['sents']))
+    amrs: Dict[str, str] = service.parse(req['sents'])
     return json.dumps({'amrs': amrs})
 
 

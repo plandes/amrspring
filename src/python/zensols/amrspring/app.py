@@ -4,30 +4,72 @@ sentences.
 """
 __author__ = 'Paul Landes'
 
-from typing import Iterable, Dict, Any
+from typing import Tuple, Iterable, Dict, List, Any
 from dataclasses import dataclass, field
+import sys
 import logging
+from io import TextIOBase
+from pathlib import Path
 import requests
 from requests.models import Response
+from zensols.config import Dictable
 from zensols.util import APIError
 
 logger = logging.getLogger(__name__)
 
 
 class AmrServiceError(APIError):
+    """Client API errors."""
     pass
 
 
 class AmrServiceRequestError(AmrServiceError):
+    """Errors raised for the protocol transport layer."""
     def __init__(self, request: Dict[str, Any], res: Response):
         super().__init__(f'Error ({res.status_code}): {res.reason}')
         self.response = res
 
 
 @dataclass
+class AmrPrediction(Dictable):
+    """An AMR prediction or error.
+
+    """
+    sent: str = field()
+    """The sentence that was used for the prediction."""
+
+    graph: str = field()
+    """The Penman formatted graph string."""
+
+    error: str = field()
+    """The message of the error or ``None`` if the prediction was successful."""
+
+    @property
+    def is_error(self) -> bool:
+        """Whether this prediction was an error."""
+        return self.error is not None
+
+    def write(self, depth: int = 0, writer: TextIOBase = sys.stdout):
+        self._write_line(f'sent: {self.sent}', depth, writer, max_len=True)
+        if self.is_error:
+            self._write_line('error:', depth, writer)
+            self._write_line(self.error, depth + 1, writer)
+        else:
+            self._write_line('graph:', depth, writer)
+            self._write_block(self.graph, depth + 1, writer)
+
+
+@dataclass
 class AmrParseClient(object):
+    """The client endpoint used to communicate to the server that predicts the
+    AMR graphs.
+
+    """
     host: str = field()
+    """The prediction server host name."""
+
     port: int = field()
+    """The prediction server host port."""
 
     def _invoke(self, data: Dict[str, Any]):
         endpoint: str = f'http://{self.host}:{self.port}/parse'
@@ -39,11 +81,40 @@ class AmrParseClient(object):
             raise AmrServiceError(serv_res['error'])
         return serv_res
 
-    def parse(self, sents: Iterable[str]):
+    def _predict(self, sents: Iterable[str]):
         res: Dict[str, Any] = self._invoke({'sents': sents})
         if 'amrs' not in res:
             raise AmrServiceError(f'Unknown data: {res}')
         return res['amrs']
+
+    def predict(self, sents: Tuple[str]) -> Iterable[AmrPrediction]:
+        """Parse ``sents`` and generate AMRs.
+
+        :param sents: the sentence strings to use as input
+
+        :return: an iterable of predictions
+
+        """
+        server_res: Dict[int, Dict[str, Any]] = self._predict(sents)
+        if len(server_res) != len(sents):
+            raise AmrServiceError(
+                'Inequal sentence requst to response count:' +
+                f'{len(server_res)} != {len(sents)}')
+        preds: List[Dict] = sorted(server_res.items(), key=lambda t: t[0])
+        sent: str
+        sent_res: Dict[str, Any]
+        for sent, sent_res in zip(sents, map(lambda t: t[1], preds)):
+            status: str = sent_res['status']
+            if status == 'error':
+                yield AmrPrediction(
+                    sent=sent,
+                    graph=None,
+                    error=sent_res['error'])
+            else:
+                yield AmrPrediction(
+                    sent=sent,
+                    graph=sent_res['graph'],
+                    error=None)
 
 
 @dataclass
@@ -53,13 +124,25 @@ class Application(object):
 
     """
     client: AmrParseClient = field()
+    """The client endpoint object."""
 
-    def parse(self, text: str):
-        """Parse ``text`` and generate AMRs.
+    def _get_text(self, text_or_file: str) -> Tuple[str]:
+        path = Path(text_or_file)
+        if path.is_file():
+            with open(path) as f:
+                return tuple(map(str.strip, f.readlines()))
+        return (text_or_file,)
 
-        :param text: the sentence to parse
+    def predict(self, text_or_file: str):
+        """Parse ``text`` and write generated AMRs.
+
+        :param text_or_file: if the file exists, use the contents of the file,
+                             otherwise, the sentence(s) to parse
 
         """
-        graph_str: str
-        for graph_str in self.client.parse([text]):
-            print(graph_str)
+        sents: Tuple[str] = self._get_text(text_or_file)
+        pred: AmrPrediction
+        for ix, pred in enumerate(self.client.predict(sents)):
+            if ix > 0:
+                print('_' * Dictable.WRITABLE_MAX_COL)
+            pred.write()

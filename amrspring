@@ -7,7 +7,7 @@ if (__name__ == '__main__'):
         src_dir_name='src/python',
         app_factory_class='zensols.amrspring.ApplicationFactory',
         config_path='test-resources/amrspring.conf',
-        proto_args='parse "Had CTA showing PE predominantly in L main PA w/ a small non-occlusive strand."',
+        proto_args='predict "Had CTA showing PE predominantly in L main PA w/ a small non-occlusive strand."',
         proto_factory_kwargs={'reload_pattern': r'^zensols.amrspring'},
     )
     harness.run()

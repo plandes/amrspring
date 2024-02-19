@@ -25,3 +25,7 @@ include ../zenbuild/main.mk
 .PHONY:			mkdata
 mkdata:
 			mkdir -p data
+
+
+.PHONY:			rerun
+rerun:			down build rmzombie rmi up

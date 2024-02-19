@@ -72,6 +72,9 @@ RUN echo "zensols.util~=1.14.1" >> requirements.txt
 RUN pip install -r requirements.txt
 # reduce logging noise
 RUN pip uninstall -y wandb
+# next two deps needed for (optional) parse caching
+RUN pip install pandas~=1.5.3
+RUN pip install --no-deps zensols.db~=1.3.0
 
 
 ## Add service
