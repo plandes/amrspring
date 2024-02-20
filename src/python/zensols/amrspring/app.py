@@ -12,6 +12,7 @@ from io import TextIOBase
 from pathlib import Path
 import requests
 from requests.models import Response
+from zensols.util.time import time
 from zensols.config import Dictable
 from zensols.util import APIError
 
@@ -81,11 +82,12 @@ class AmrParseClient(object):
             raise AmrServiceError(serv_res['error'])
         return serv_res
 
-    def _predict(self, sents: Iterable[str]):
-        res: Dict[str, Any] = self._invoke({'sents': sents})
-        if 'amrs' not in res:
-            raise AmrServiceError(f'Unknown data: {res}')
-        return res['amrs']
+    def _predict(self, sents: Tuple[str]):
+        with time(f'predicted {len(sents)} sentences', logging.INFO, logger):
+            res: Dict[str, Any] = self._invoke({'sents': sents})
+            if 'amrs' not in res:
+                raise AmrServiceError(f'Unknown data: {res}')
+            return res['amrs']
 
     def predict(self, sents: Tuple[str]) -> Iterable[AmrPrediction]:
         """Parse ``sents`` and generate AMRs.
