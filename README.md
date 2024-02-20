@@ -20,8 +20,7 @@ uses the SPRING model for inferencing and returns the parsed AMRs.
 Features:
 
 * Parse natural language sentence (batched) into AMRs.
-* Results are cached either in memory or in an SQLite database based on the
-  configuration.
+* Results cached either in memory or an SQLite database.
 * Both a command line and Pythonic object oriented client API.
 
 
