@@ -62,7 +62,7 @@ class AmrPrediction(Dictable):
 
 @dataclass
 class AmrParseClient(object):
-    """The client endpoint used to communicate to the server that predicts the
+    """The client endpoint used to communicate to the server that parses the
     AMR graphs.
 
     """
@@ -82,22 +82,22 @@ class AmrParseClient(object):
             raise AmrServiceError(serv_res['error'])
         return serv_res
 
-    def _predict(self, sents: Tuple[str]):
-        with time(f'predicted {len(sents)} sentences', logging.INFO, logger):
+    def _parse(self, sents: Tuple[str]):
+        with time(f'parsed {len(sents)} sentences', logging.INFO, logger):
             res: Dict[str, Any] = self._invoke({'sents': sents})
             if 'amrs' not in res:
                 raise AmrServiceError(f'Unknown data: {res}')
             return res['amrs']
 
-    def predict(self, sents: Tuple[str]) -> Iterable[AmrPrediction]:
+    def parse(self, sents: Tuple[str]) -> Iterable[AmrPrediction]:
         """Parse ``sents`` and generate AMRs.
 
         :param sents: the sentence strings to use as input
 
-        :return: an iterable of predictions
+        :return: an iterable of predicted AMR graph results
 
         """
-        server_res: Dict[int, Dict[str, Any]] = self._predict(sents)
+        server_res: Dict[int, Dict[str, Any]] = self._parse(sents)
         if len(server_res) != len(sents):
             raise AmrServiceError(
                 'Inequal sentence requst to response count:' +
@@ -135,7 +135,7 @@ class Application(object):
                 return tuple(map(str.strip, f.readlines()))
         return (text_or_file,)
 
-    def predict(self, text_or_file: str):
+    def parse(self, text_or_file: str):
         """Parse ``text`` and write generated AMRs.
 
         :param text_or_file: if the file exists, use the contents of the file,
@@ -144,7 +144,7 @@ class Application(object):
         """
         sents: Tuple[str] = self._get_text(text_or_file)
         pred: AmrPrediction
-        for ix, pred in enumerate(self.client.predict(sents)):
+        for ix, pred in enumerate(self.client.parse(sents)):
             if ix > 0:
                 print('_' * Dictable.WRITABLE_MAX_COL)
             pred.write()
