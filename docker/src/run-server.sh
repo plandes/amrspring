@@ -1,15 +1,15 @@
 #!/bin/bash
 
 export PYTHONPATH=$PYTHONPATH:.
-
-mkdir -p /opt/data/cache
+BASE_DIR=${BASE_DIR:-/opt}
+mkdir -p ${BASE_DIR:-/opt}/data/cache
 
 python bin/inference_server.py \
-    --checkpoint /opt/models/model.pt \
-    --datadir /opt/data \
+    --checkpoint ${BASE_DIR:-/opt}/models/model.pt \
+    --datadir ${BASE_DIR:-/opt}/data \
     --beam-size 5 \
     --max-tokens 200 \
     --batch-size 500 \
     --penman-linearization \
     --use-pointer-tokens \
-    > /opt/data/server.log 2>&1
+    > ${BASE_DIR:-/opt}/data/server.log 2>&1

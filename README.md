@@ -38,11 +38,25 @@ First install the client:
 pip3 install zensols.amrspring
 ```
 
+
+### Server
+
+There is a script to build a local server, but there is also a docker image.
+
+To build a local server:
+1. Clone this repo: `git clone https://github.com/plandes/amrspring`
+1. Working directory: `cd amrspring`
+1. Build out the server: `src/bin/build-server.sh`
+1. Start it `( cd server ; ./serverctl start )`
+1. Test it `( cd server ; ./serverctl test-server )`
+1. Stop it `( cd server ; ./serverctl top )`
+
 To build the Docker image:
 1. Download the model(s) from the [AMR SPRING parser] repository.
 1. Build the image: `cd docker ; make build`
 1. Check for errors.
 1. Start the image: `make up`
+1. Test using a method from [usage](#usage).
 
 Of course, the server code can be run without docker by cloning the [AMR SPRING
 parser] repository and adding the [server code](docker/src).  See the
@@ -53,7 +67,23 @@ parser] repository and adding the [server code](docker/src).  See the
 
 The package can be used from the command line or directly via a Python API.
 
-Command line:
+You can use a combination UNIX tools to `POST` directly to it:
+```bash
+wget -q -O - --post-data='{"sents": ["Obama was the 44th president."]}' \
+  --header='Content-Type:application/json' \
+  'http://localhost:8080/parse' | jq -r '.amrs."0"."graph"'
+# ::snt Obama was the 44th president.
+(z0 / person
+    :ord (z1 / ordinal-entity
+             :value 44)
+    :ARG0-of (z2 / have-org-role-91
+                 :ARG2 (z3 / president))
+    :domain (z4 / person
+                :name (z5 / name
+                          :op1 "Obama")))
+```
+
+It also offers a command line:
 ```bash
 $ amrspring --level warn parse 'Obama was the president.'
 sent: Obama was the president.
@@ -67,7 +97,7 @@ graph:
                               :op1 "Obama")))
 ```
 
-Python API:
+The Python API is very straight forward as well:
 ```python
 >>> from zensols.amrspring import AmrPrediction, ApplicationFactory
 >>> client = ApplicationFactory.get_client()
