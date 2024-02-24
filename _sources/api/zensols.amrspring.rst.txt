@@ -1,0 +1,33 @@
+zensols.amrspring package
+=========================
+
+Submodules
+----------
+
+zensols.amrspring.app
+---------------------
+.. inheritance-diagram:: zensols.amrspring.app
+   :parts: 1
+
+.. automodule:: zensols.amrspring.app
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+zensols.amrspring.cli
+---------------------
+.. inheritance-diagram:: zensols.amrspring.cli
+   :parts: 1
+
+.. automodule:: zensols.amrspring.cli
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: zensols.amrspring
+   :members:
+   :undoc-members:
+   :show-inheritance:
