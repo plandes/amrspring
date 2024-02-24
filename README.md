@@ -144,4 +144,4 @@ Copyright (c) 2024 Paul Landes
 [python311-link]: https://www.python.org/downloads/release/python-3110
 [build-badge]: https://github.com/plandes/amrspring/workflows/CI/badge.svg
 
-[AMR SPRING parser]: git clone https://github.com/SapienzaNLP/spring
+[AMR SPRING parser]: https://github.com/SapienzaNLP/spring
