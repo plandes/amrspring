@@ -46,7 +46,7 @@ There is a script to build a local server, but there is also a docker image.
 To build a local server:
 1. Clone this repo: `git clone https://github.com/plandes/amrspring`
 1. Working directory: `cd amrspring`
-1. Build out the server: `src/bin/build-server.sh`
+1. Build out the server: `src/bin/build-server.sh <python installation directory>`
 1. Start it `( cd server ; ./serverctl start )`
 1. Test it `( cd server ; ./serverctl test-server )`
 1. Stop it `( cd server ; ./serverctl top )`
