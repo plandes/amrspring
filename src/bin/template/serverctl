@@ -5,6 +5,7 @@ USAGE="usage: $PROG <start|stop>"
 
 case "$1" in
     start)
+	cd $(dirname $0)
 	export PATH=$(pwd)/python/bin:$PATH
 	export BASE_DIR=.
 	cd spring
