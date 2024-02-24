@@ -9,26 +9,19 @@ A client and server that generates AMR graphs from natural language sentences.
 This repository has a Docker that compiles the [AMR SPRING parser] using the
 original settings of the authors.
 
-The Docker image was created because this parser has a very specific set of
+The Docker image was created because this parser has a very particular set of
 Python dependencies that do not compile under some platforms.  Specifically
 `tokenizers==0.7.0` fails to compile from source on a `pip` install because of
-a Rust compiler misconfiguration.
+a Rust (version) compiler misconfiguration.
 
-The Docker image provides a very simple service written in [Flask] that
-uses the SPRING model for inferencing and returns the parsed AMRs.
+The [Docker image](#docker) provides a very simple service written in [Flask]
+that uses the SPRING model for inferencing and returns the parsed AMRs.
 
 Features:
 
 * Parse natural language sentence (batched) into AMRs.
-* Results cached either in memory or an SQLite database.
+* Results cached in memory or an SQLite database.
 * Both a command line and Pythonic object oriented client API.
-
-
-## Documentation
-
-See the [full documentation](https://plandes.github.io/amrspring/index.html).
-The [API reference](https://plandes.github.io/amrspring/api.html) is also
-available.
 
 
 ## Installing
@@ -50,6 +43,9 @@ To build a local server:
 1. Start it `( cd server ; ./serverctl start )`
 1. Test it `( cd server ; ./serverctl test-server )`
 1. Stop it `( cd server ; ./serverctl top )`
+
+
+### Docker
 
 To build the Docker image:
 1. Download the model(s) from the [AMR SPRING parser] repository.
@@ -112,6 +108,13 @@ The Python API is very straight forward as well:
                 :name (z4 / name
                           :op1 "Obama")))
 ```
+
+
+## Documentation
+
+See the [full documentation](https://plandes.github.io/amrspring/index.html).
+The [API reference](https://plandes.github.io/amrspring/api.html) is also
+available.
 
 
 ## Changelog
