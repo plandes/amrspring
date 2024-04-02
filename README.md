@@ -1,4 +1,4 @@
-# A Spring AMR service and client
+# A SPRING AMR service and client
 
 [![PyPI][pypi-badge]][pypi-link]
 [![Python 3.10][python3100-badge]][python3100-link]
@@ -121,10 +121,27 @@ available.
 An extensive changelog is available [here](CHANGELOG.md).
 
 
-## Community
+## Citation
 
-Please star this repository and let me know how and where you use this API.
-Contributions as pull requests, feedback and any input is welcome.
+This package and the [docker](./docker) image uses the original [AMR SPRING
+parser] source code base from the paper *"One SPRING to Rule Them Both:
+Symmetric AMR Semantic Parsing and Generation without a Complex Pipeline"*:
+
+```bibtex
+@inproceedings{bevilacquaOneSPRINGRule2021,
+  title = {One {{SPRING}} to {{Rule Them Both}}: {{Symmetric AMR Semantic Parsing}} and {{Generation}} without a {{Complex Pipeline}}},
+  shorttitle = {One {{SPRING}} to {{Rule Them Both}}},
+  booktitle = {Proceedings of the {{AAAI Conference}} on {{Artificial Intelligence}}},
+  author = {Bevilacqua, Michele and Blloshmi, Rexhina and Navigli, Roberto},
+  date = {2021-05-18},
+  volume = {35},
+  number = {14},
+  pages = {12564--12573},
+  location = {Virtual},
+  url = {https://ojs.aaai.org/index.php/AAAI/article/view/17489},
+  urldate = {2022-07-28}
+}
+```
 
 
 ## License

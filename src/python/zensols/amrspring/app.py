@@ -1,6 +1,15 @@
 """A client and server that generates AMR graphs from natural language
 sentences.
 
+Citation:
+
+  `Bevilacqua et al. (2021)`_ One SPRING to Rule Them Both: Symmetric AMR
+  Semantic Parsing and Generation without a Complex Pipeline. In Proceedings of
+  the AAAI Conference on Artificial Intelligence, volume 35, pages 12564–12573,
+  Virtual, May.
+
+  .. _Bevilacqua et al. (2021): https://ojs.aaai.org/index.php/AAAI/article/view/17489
+
 """
 __author__ = 'Paul Landes'
 
@@ -64,6 +73,15 @@ class AmrPrediction(Dictable):
 class AmrParseClient(object):
     """The client endpoint used to communicate to the server that parses the
     AMR graphs.
+
+    Citation:
+
+      `Bevilacqua et al. (2021)`_ One SPRING to Rule Them Both: Symmetric AMR
+      Semantic Parsing and Generation without a Complex Pipeline. In Proceedings
+      of the AAAI Conference on Artificial Intelligence, volume 35, pages
+      12564–12573, Virtual, May.
+
+      .. _Bevilacqua et al. (2021): https://ojs.aaai.org/index.php/AAAI/article/view/17489
 
     """
     host: str = field()
