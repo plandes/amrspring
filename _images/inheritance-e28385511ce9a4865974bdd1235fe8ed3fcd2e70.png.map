@@ -1,0 +1,11 @@
+<map id="inheritance4ab988eb9f" name="inheritance4ab988eb9f">
+<area shape="rect" id="node1" title="Helper class that provides a standard way to create an ABC using" alt="" coords="37,5,109,36"/>
+<area shape="rect" id="node9" title="An interface for classes that have multi&#45;line debuging capability." alt="" coords="29,84,117,115"/>
+<area shape="rect" id="node2" title="Base exception from which almost all library raised errors extend." alt="" coords="237,5,328,36"/>
+<area shape="rect" id="node6" href="#zensols.amrspring.app.AmrServiceError" target="_top" title="Client API errors." alt="" coords="205,84,361,115"/>
+<area shape="rect" id="node3" href="#zensols.amrspring.app.AmrParseClient" target="_top" title="The client endpoint used to communicate to the server that parses the" alt="" coords="472,5,621,36"/>
+<area shape="rect" id="node4" href="#zensols.amrspring.app.AmrPrediction" target="_top" title="An AMR prediction or error." alt="" coords="5,241,141,272"/>
+<area shape="rect" id="node5" title="A class that that generates a dictionary recursively from data classes" alt="" coords="30,163,117,193"/>
+<area shape="rect" id="node7" href="#zensols.amrspring.app.AmrServiceRequestError" target="_top" title="Errors raised for the protocol transport layer." alt="" coords="171,163,394,193"/>
+<area shape="rect" id="node8" href="#zensols.amrspring.app.Application" target="_top" title="A client and server that generates AMR graphs from natural language" alt="" coords="706,5,817,36"/>
+</map>
