@@ -14,6 +14,8 @@ DOCKER_IMG_NAME=	springserv
 DOCKER_USER=		plandes
 DOCKER_UP_DEPS=		mkdata
 
+DOCKER_BUILD_ARGS =	--progress plain
+
 
 ## Includes
 #
@@ -29,3 +31,9 @@ mkdata:
 
 .PHONY:			rerun
 rerun:			down build rmzombie rmi up
+
+.PHONY:			testmodel
+testmodel:
+			wget -q -O - --post-data='{"sents": ["Obama was the 44th president."]}' \
+			  --header='Content-Type:application/json' \
+			  'http://localhost:8080/parse'

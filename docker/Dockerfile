@@ -64,11 +64,8 @@ RUN mkdir /inst && mv dist/* /inst && pip install /inst/*
 WORKDIR ${APP_HOME}
 RUN cd / && \
     git clone https://github.com/SapienzaNLP/spring app
-# no terminating endline in the repo
-RUN echo "" >> requirements.txt
 # service requirements
-RUN echo "Flask~=2.2.5" >> requirements.txt
-RUN echo "zensols.util~=1.14.1" >> requirements.txt
+COPY src/requirements.txt .
 RUN pip install -r requirements.txt
 # reduce logging noise
 RUN pip uninstall -y wandb
@@ -106,7 +103,8 @@ RUN apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/* && \
-    rm -rf /var/tmp/*
+    rm -rf /var/tmp/* && \
+    rm -fr ~/.cache/pip
 
 
 ## Config
