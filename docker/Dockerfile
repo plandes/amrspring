@@ -22,6 +22,7 @@ RUN apt-get update && \
         file \
         ssh \
         git \
+        git-lfs \
         unzip \
         wget \
         curl \
@@ -72,13 +73,6 @@ RUN pip uninstall -y wandb
 # next two deps needed for (optional) parse caching
 RUN pip install pandas~=1.5.3
 RUN pip install --no-deps zensols.db~=1.3.0
-
-
-## Add base model
-#
-RUN apt-get install git-lfs && \
-    git lfs install && \
-    git clone https://huggingface.co/facebook/bart-large
 
 
 ## Add service

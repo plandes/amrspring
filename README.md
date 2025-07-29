@@ -41,10 +41,14 @@ To start the server from a Docker container
 1. Clone this repo: `git clone https://github.com/plandes/amrspring`
 1. Set the working directory: `cd amrspring`
 1. Download the model(s) from the [AMR SPRING parser] repository.
-1. Pull the image (very large): `docker pull plandes/springserv`
+1. Pull the image: `docker pull plandes/springserv`
 1. Change the working directory to the docker source tree: `cd docker`
 1. Add the model: `mkdir models && mv your-spring-model.pt models/model.pt`
 1. Start the container using the docker compose: `docker-compose up -d`
+
+**Note**: The server takes a long time to come up the first time because it
+will download the BART base model in the [models directory](docker/models).
+See the [usage](#usage) section on how to test the server.
 
 
 ### Server
@@ -67,6 +71,10 @@ You can use a combination UNIX tools to `POST` directly to it:
 wget -q -O - --post-data='{"sents": ["Obama was the 44th president."]}' \
   --header='Content-Type:application/json' \
   'http://localhost:8080/parse' | jq -r '.amrs."0"."graph"'
+```
+
+The output should be:
+```lisp
 # ::snt Obama was the 44th president.
 (z0 / person
     :ord (z1 / ordinal-entity

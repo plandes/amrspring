@@ -36,4 +36,5 @@ rerun:			down build rmzombie rmi up
 testmodel:
 			wget -q -O - --post-data='{"sents": ["Obama was the 44th president."]}' \
 			  --header='Content-Type:application/json' \
-			  'http://localhost:8080/parse'
+			  'http://localhost:8080/parse' | \
+			  jq -r '.amrs."0"."graph"'
