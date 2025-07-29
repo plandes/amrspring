@@ -38,7 +38,8 @@ def parse_args():
         '--checkpoint', type=str, required=True,
         help="Required. Checkpoint to restore.")
     parser.add_argument(
-        '--model', type=str, default='facebook/bart-large',
+#        '--model', type=str, default='facebook/bart-large',
+        '--model', type=str, default='./bart-large',
         help="Model config to use to load the model class.")
     parser.add_argument(
         '--beam-size', type=int, default=1,

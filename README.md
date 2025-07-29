@@ -29,33 +29,33 @@ First install the client:
 ```bash
 pip3 install zensols.amrspring
 ```
+You can run the server [locally](#server), but it is far easier and faster to
+use and pull the [docker image](#docker-image).  In the unlikely case you want
+to be the docker image yourself, see the [docker build
+instructions](docker/README.md).
+
+
+### Docker Image
+
+To start the server from a Docker container
+1. Clone this repo: `git clone https://github.com/plandes/amrspring`
+1. Set the working directory: `cd amrspring`
+1. Download the model(s) from the [AMR SPRING parser] repository.
+1. Pull the image (very large): `docker pull plandes/springserv`
+1. Change the working directory to the docker source tree: `cd docker`
+1. Add the model: `mkdir models && mv your-spring-model.pt models/model.pt`
+1. Start the container using the docker compose: `docker-compose up -d`
 
 
 ### Server
 
-There is a script to build a local server, but there is also a docker image.
-
 To build a local server:
 1. Clone this repo: `git clone https://github.com/plandes/amrspring`
-1. Working directory: `cd amrspring`
+1. Set the working directory: `cd amrspring`
 1. Build out the server: `src/bin/build-server.sh <python installation directory>`
 1. Start it `( cd server ; ./serverctl start )`
 1. Test it `( cd server ; ./serverctl test-server )`
 1. Stop it `( cd server ; ./serverctl top )`
-
-
-### Docker
-
-To build the Docker image:
-1. Download the model(s) from the [AMR SPRING parser] repository.
-1. Build the image: `cd docker ; make build`
-1. Check for errors.
-1. Start the image: `make up`
-1. Test using a method from [usage](#usage).
-
-Of course, the server code can be run without docker by cloning the [AMR SPRING
-parser] repository and adding the [server code](docker/src).  See the
-[Dockerfile](docker/Dockerfile) for more information on how to do that.
 
 
 ## Usage

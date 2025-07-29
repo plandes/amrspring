@@ -74,6 +74,13 @@ RUN pip install pandas~=1.5.3
 RUN pip install --no-deps zensols.db~=1.3.0
 
 
+## Add base model
+#
+RUN apt-get install git-lfs && \
+    git lfs install && \
+    git clone https://huggingface.co/facebook/bart-large
+
+
 ## Add service
 #
 COPY src/inference_server.py bin
@@ -88,8 +95,7 @@ RUN addgroup --gid $DEV_GID $DEV_GROUP && \
       --uid $DEV_UID --gid $DEV_GID --home ${APP_HOME} $DEV_USER
 
 # volume mapped
-RUN mkdir -p /opt/data/cache && mkdir -p /opt/models
-RUN ln -s /opt/data/cache .cache
+RUN mkdir -p /opt/data && mkdir -p /opt/models
 
 # make application user ownership
 RUN chown -R $DEV_USER:$DEV_GROUP .
@@ -103,8 +109,8 @@ RUN apt-get -y autoremove && \
     apt-get -y clean && \
     rm -rf /var/lib/apt/lists/* && \
     rm -rf /tmp/* && \
-    rm -rf /var/tmp/* && \
-    rm -fr ~/.cache/pip
+    rm -rf /var/tmp/* \
+    rm -rf ~/.cache
 
 
 ## Config
