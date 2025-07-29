@@ -30,14 +30,18 @@ First install the client:
 pip3 install zensols.amrspring
 ```
 You can run the server [locally](#server), but it is far easier and faster to
-use and pull the [docker image](#docker-image).  In the unlikely case you want
-to be the docker image yourself, see the [docker build
+use and pull the [docker image] (see the [docker image section](#docker-image)).  In
+the unlikely case you want to be the docker image yourself, see the [docker build
 instructions](docker/README.md).
 
 
 ### Docker Image
 
-To start the server from a Docker container
+There is a [docker image] with all dependencies needed to run except the models
+public BART checkpoint (automatically downloaded), and the SPRING model (you
+supply this).
+
+To start the server from a Docker container:
 1. Clone this repo: `git clone https://github.com/plandes/amrspring`
 1. Set the working directory: `cd amrspring`
 1. Download the model(s) from the [AMR SPRING parser] repository.
@@ -170,3 +174,4 @@ Copyright (c) 2024 Paul Landes
 [build-badge]: https://github.com/plandes/amrspring/workflows/CI/badge.svg
 
 [AMR SPRING parser]: https://github.com/SapienzaNLP/spring
+[docker image]: https://hub.docker.com/repository/docker/plandes/springserv
