@@ -1,8 +1,8 @@
 # A SPRING AMR service and client
 
 [![PyPI][pypi-badge]][pypi-link]
-[![Python 3.11][python311-badge]][python311-link]
 [![Python 3.12][python312-badge]][python312-link]
+[![Python 3.11][python311-badge]][python311-link]
 
 A client and server that generates AMR graphs from natural language sentences.
 This repository has a Docker that compiles the [AMR SPRING parser] using the
@@ -167,8 +167,10 @@ Copyright (c) 2024 - 2025 Paul Landes
 [pypi]: https://pypi.org/project/zensols.amrspring/
 [pypi-link]: https://pypi.python.org/pypi/zensols.amrspring
 [pypi-badge]: https://img.shields.io/pypi/v/zensols.amrspring.svg
-[python311-badge]: https://img.shields.io/badge/python-3.11-blue.svg
+[python312-badge]: https://img.shields.io/badge/python-3.12-blue.svg
 [python312-link]: https://www.python.org/downloads/release/python-3120
+[python311-badge]: https://img.shields.io/badge/python-3.11-blue.svg
+[python311-link]: https://www.python.org/downloads/release/python-3110
 [build-badge]: https://github.com/plandes/amrspring/workflows/CI/badge.svg
 
 [AMR SPRING parser]: https://github.com/SapienzaNLP/spring
